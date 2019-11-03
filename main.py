@@ -73,7 +73,7 @@ seed_fn()
 learning_rate = 0.01
 num_epoch_first_train = 11
 num_epoch_fine_tune = 4
-pretrained = False
+pretrained = True
 
 mnist_loader = prepare_data_loaders(config['mnist'], ['valid'])
 svhn_loaders = prepare_data_loaders(config['svhn'], ['train', 'valid'])

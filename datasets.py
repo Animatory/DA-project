@@ -1,5 +1,3 @@
-from numpy import random
-
 import torch
 import scipy.io as sio
 from torch.utils.data import Dataset

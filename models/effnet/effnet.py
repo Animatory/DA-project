@@ -216,7 +216,6 @@ class EfficientNetB0(nn.Module):
         self.bn2 = bn2d(1280)
 
         self.global_pool = nn.AdaptiveAvgPool2d(1)
-        # self.classifier = nn.Linear(self.num_features, self.num_classes)
         self.classifier = ArcMarginModel(self.num_features, self.num_classes, margin=margin, scale=scale)
 
         for m in self.modules():
@@ -230,7 +229,6 @@ class EfficientNetB0(nn.Module):
         self.num_classes = num_classes
         del self.classifier
         if num_classes:
-            # self.classifier = nn.Linear(self.num_features, self.num_classes)
             margin = 0.5 * num_classes / (num_classes - 1)
             scale = num_classes / (num_classes - 1) * math.log((num_classes - 1) * 0.9 / (1 - 0.9))
             self.classifier = ArcMarginModel(self.num_features, num_classes, margin=margin, scale=scale)
@@ -255,7 +253,6 @@ class EfficientNetB0(nn.Module):
         x = self.forward_features(input)
         if self.classifier is not None:
             x = self.classifier(x, target)
-            # x = self.classifier(x)
         return x
 
     @staticmethod
