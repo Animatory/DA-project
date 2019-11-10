@@ -54,6 +54,24 @@ def sigmoid(x, inplace=False):
     return x.sigmoid_() if inplace else x.sigmoid()
 
 
+class Swish(nn.Module):
+    def __init__(self, inplace=False):
+        super().__init__()
+        self.inplace = inplace
+
+    def forward(self, x):
+        return swish(x, self.inplace)
+
+
+class Sigmoid(nn.Module):
+    def __init__(self, inplace=False):
+        super().__init__()
+        self.inplace = inplace
+
+    def forward(self, x):
+        return sigmoid(x, self.inplace)
+
+
 def drop_connect(inputs, training=False, drop_connect_rate=0.):
     """Apply drop connect."""
     if not training:

@@ -5,6 +5,7 @@ from torch.optim import lr_scheduler
 from tqdm import tqdm
 
 from models.effnet.effnet import efficientnet_b0
+from models.resnet.resnet import resnet18
 from datasets import prepare_data_loaders
 from config import config
 from models.utils import seed_fn
@@ -71,7 +72,7 @@ def train_cycle(num_epoch, loaders, model, optimizer, criterion, scheduler, metr
 seed_fn()
 
 learning_rate = 0.01
-num_epoch_first_train = 11
+num_epoch_first_train = 50
 num_epoch_fine_tune = 4
 pretrained = True
 
@@ -86,7 +87,7 @@ loaders = {
 model = efficientnet_b0(pretrained=pretrained, num_classes=10).cuda()
 
 optimizer = optim.Adam(model.parameters(), lr=learning_rate, weight_decay=5e-4)
-scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[1, 5, 9], gamma=0.1)
+scheduler = optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0=1, T_mult=2)
 
 metrics = config['metrics']
 
