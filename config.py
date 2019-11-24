@@ -1,6 +1,8 @@
 from albumentations import *
 from albumentations.pytorch import ToTensorV2
-from metrics import F1Meter, AccuracyMeter, AverageMeter
+
+from metrics import AccuracyMeter, AverageMeter
+from models.augmentations import ImageAugmentation, NormalizeCustom
 
 config = {
     'mnist': {
@@ -8,17 +10,17 @@ config = {
         'dataset_name': 'MNISTDataset',
         'valid': {
             'data_path': 'data/MNIST/processed/test.pt',
-            'transforms': Compose([
+            'transform': Compose([
                 Resize(32, 32),
-                Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+                NormalizeCustom(),
                 ToTensorV2(),
             ])
         },
         'train': {
             'data_path': 'data/MNIST/processed/training.pt',
-            'transforms': Compose([
+            'transform': Compose([
                 Resize(32, 32),
-                Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+                NormalizeCustom(),
                 ToTensorV2(),
             ])
         }
@@ -28,25 +30,49 @@ config = {
         'dataset_name': 'SVHNDataset',
         'valid': {
             'data_path': 'data/SVHN/test_32x32.mat',
-            'transforms': Compose([
-                Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+            'transform': Compose([
+                NormalizeCustom(),
                 ToTensorV2(),
             ])
         },
         'train': {
             'data_path': 'data/SVHN/train_32x32.mat',
-            'transforms': Compose([
-                InvertImg(),
-                GaussNoise(),
-                ShiftScaleRotate(rotate_limit=10),
-                Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+            'transform': Compose([
+                NormalizeCustom(),
                 ToTensorV2(),
             ])
         }
     },
+    'mixed': {
+        'batch_size': 256,
+        'dataset_name': 'MixedDataset',
+        'train': {
+            'data_path_source': 'data/SVHN/train_32x32.mat',
+            'data_path_target': 'data/MNIST/processed/training.pt',
+            'transform':
+                {
+                    'source': Compose([
+                        InvertImg(),
+                        NormalizeCustom(),
+                        ImageAugmentation(False, xlat_range=2, affine_std=.1, gaussian_noise_std=0.1,
+                                          intens_scale_range_lower=.25, intens_scale_range_upper=1.5,
+                                          intens_offset_range_lower=-0.5, intens_offset_range_upper=0.5),
+                        ToTensorV2(),
+                    ]),
+                    'target': Compose([
+                        InvertImg(),
+                        Resize(32, 32),
+                        NormalizeCustom(),
+                        ImageAugmentation(False, xlat_range=2, affine_std=.1, gaussian_noise_std=0.1,
+                                          intens_scale_range_lower=.25, intens_scale_range_upper=1.5,
+                                          intens_offset_range_lower=-0.5, intens_offset_range_upper=0.5),
+                        ToTensorV2(),
+                    ]),
+                }
+        }
+    },
     'metrics': [
         AccuracyMeter(),
-        # F1Meter(10, average='macro'),
-        AverageMeter()
+        AverageMeter('loss')
     ]
 }

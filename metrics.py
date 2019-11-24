@@ -4,7 +4,8 @@ from sklearn.metrics import f1_score, accuracy_score
 
 class AverageMeter:
     """Computes and stores the average and current value"""
-    def __init__(self):
+    def __init__(self, metric_name):
+        self._name = metric_name
         self.reset()
 
     def reset(self):
@@ -19,12 +20,19 @@ class AverageMeter:
         self.count += n
         self.avg = self.sum / self.count
 
+    @property
+    def name(self):
+        return self._name
+
+    def value(self):
+        return self.avg
+
 
 class F1Meter:
     def __init__(self, k, average='macro'):
         self._override_name = f'f1_score_{average}'
         self._average = average
-        self.meter = AverageMeter()
+        self.meter = AverageMeter(self._override_name)
         self.labels = range(k)
 
     def reset(self):
@@ -39,6 +47,7 @@ class F1Meter:
     def value(self):
         return self.meter.avg
 
+    @property
     def name(self):
         return self._override_name
 
@@ -46,7 +55,7 @@ class F1Meter:
 class AccuracyMeter:
     def __init__(self):
         self._override_name = 'accuracy'
-        self.meter = AverageMeter()
+        self.meter = AverageMeter(self._override_name)
 
     def reset(self):
         self.meter.reset()
@@ -59,5 +68,6 @@ class AccuracyMeter:
     def value(self):
         return self.meter.avg
 
+    @property
     def name(self):
         return self._override_name
